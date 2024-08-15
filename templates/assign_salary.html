@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Assign Salary{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Assign Salary</h1>
+    </header>
+    
+    <section class="salary-assignment-section">
+        <h2 class="section-heading">Assign Salary to {{ task.employee.full_name }}</h2>
+        <form action="/assign_salary/{{ task.id }}" method="POST" class="form">
+            <div class="form-group">
+                <label for="salary">Salary:</label>
+                <input type="text" id="salary" name="salary" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Assign Salary" class="btn submit-btn">
+            </div>
+        </form>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn back-btn">Back to Dashboard</a>
+    </section>
+</div>
+{% endblock %}

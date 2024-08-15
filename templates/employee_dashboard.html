@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Employee Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+    
+    <!-- Tasks Section -->
+    <section class="tasks-section">
+        <h2 class="tasks-heading">Your Tasks</h2>
+        {% if tasks %}
+        <div class="task-cards">
+            {% for task in tasks %}
+            <div class="task-card {% if task.is_completed %}completed{% endif %}">
+                <div class="task-header">
+                    <h3>{{ task.title }}</h3>
+                    <p class="status {% if task.is_completed %}completed{% else %}pending{% endif %}">
+                        {{ 'Completed' if task.is_completed else 'Pending' }}
+                    </p>
+                </div>
+                <div class="task-body">
+                    <p>{{ task.description }}</p>
+                    <p class="due-date">Due: {{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    {% if task.file_url %}
+                    <p><a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attached File</a></p>
+                    {% endif %}
+                </div>
+                {% if not task.is_completed %}
+                <div class="task-footer">
+                    <a href="/submit_task/{{ task.id }}" class="btn submit-btn">Submit Task</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-tasks">You have no tasks assigned yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Two-Column Task History Section -->
+    <section class="task-history-section">
+        <h2 class="tasks-heading">Task History</h2>
+        <div class="row">
+            <!-- Admin Assigned Tasks -->
+            <div class="column">
+                <h3>Tasks Assigned by Admin</h3>
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Due Date</th>
+                            <th>File Attachment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr class="{% if task.is_completed %}completed{% endif %}">
+                            <td>{{ task.title }}</td>
+                            <td>{{ task.description }}</td>
+                            <td>{{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                {% if task.file_url %}
+                                <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Employee Submitted Tasks -->
+            <div class="column">
+                <h3>Tasks Submitted by You</h3>
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Submitted On</th>
+                            <th>File Attachment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks if task.is_completed %}
+                        <tr class="completed">
+                            <td>{{ task.title }}</td>
+                            <td>{{ 'Completed' if task.is_completed else 'Pending' }}</td>
+                            <td>{{ task.submitted_on.strftime('%Y-%m-%d %H:%M:%S') if task.submitted_on else 'N/A' }}</td>
+                            <td>
+                                {% if task.file_url %}
+                                <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <a href="/logout" class="btn logout-btn">Logout</a>
+    </footer>
+</div>
+{% endblock %}
