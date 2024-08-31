@@ -166,6 +166,7 @@ def admin_dashboard():
                            tasks=tasks)
 
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -210,28 +211,53 @@ def submit_task(task_id):
     return render_template('task_submission.html', task=task)
 
 
-@app.route('/assign_salary/<int:task_id>', methods=['GET', 'POST'])
-def assign_salary(task_id):
-    task = Task.query.get(task_id)
-    if not task:
-        flash('Task not found.', 'danger')
-        return redirect(url_for('admin_dashboard'))
-
+@app.route('/assign_salary', methods=['GET', 'POST'])
+def assign_salary():
+    employees = Employee.query.all()
     if request.method == 'POST':
+        employee_id = request.form['employee_id']
         salary = request.form['salary']
-        if not salary:
-            flash('Salary cannot be empty.', 'danger')
-            return redirect(url_for('assign_salary', task_id=task_id))
+        if not salary.isdigit():
+            flash('Invalid salary amount.', 'danger')
+            return redirect(url_for('assign_salary'))
         
-        employee = task.employee
-        employee.salary = salary
+        employee = Employee.query.get(employee_id)
+        employee.salary = float(salary)
         db.session.commit()
-        
         flash('Salary assigned successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))
-    
-    return render_template('assign_salary.html', task=task)
+        return redirect(url_for('view_employees'))
 
+    return render_template('assign_salary.html', employees=employees)
+
+@app.route('/view_employees')
+def view_employees():
+    employees = Employee.query.all()
+    return render_template('view_employees.html', employees=employees)
+
+@app.route('/view_tasks')
+def view_tasks():
+    tasks = Task.query.all()
+    return render_template('view_tasks.html', tasks=tasks)
+
+@app.route('/view_pending_tasks')
+def view_pending_tasks():
+    tasks = Task.query.filter_by(is_completed=False).all()
+    return render_template('view_pending_tasks.html', tasks=tasks)
+
+@app.route('/view_completed_tasks')
+def view_completed_tasks():
+    tasks = Task.query.filter_by(is_completed=True).all()
+    return render_template('view_completed_tasks.html', tasks=tasks)
+
+@app.route('/view_overdue_tasks')
+def view_overdue_tasks():
+    tasks = Task.query.filter(Task.due_date < datetime.now(), Task.is_completed == False).all()
+    return render_template('view_overdue_tasks.html', tasks=tasks)
+
+@app.route('/view_late_tasks')
+def view_late_tasks():
+    tasks = Task.query.filter(Task.due_date < datetime.now(), Task.is_completed == True).all()
+    return render_template('view_late_tasks.html', tasks=tasks)
 
 @app.route('/logout')
 def logout():
@@ -286,6 +312,15 @@ def assign_task():
         employees = Employee.query.all()
         return render_template('assign_task.html', employees=employees)
 
+@app.route('/view_salary_history')
+def view_salary_history():
+    employees = Employee.query.all()
+    return render_template('view_salary_history.html', employees=employees)
+
+@app.route('/view_performance_report')
+def view_performance_report():
+    employees = Employee.query.all()
+    return render_template('view_performance_report.html', employees=employees)
 
 
 

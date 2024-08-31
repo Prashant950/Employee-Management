@@ -1,112 +1,312 @@
-{% extends "base.html" %}
-{% block title %}Employee Dashboard{% endblock %}
-{% block content %}
-<div class="container">
-    
-    <!-- Tasks Section -->
-    <section class="tasks-section">
-        <h2 class="tasks-heading">Your Tasks</h2>
-        {% if tasks %}
-        <div class="task-cards">
-            {% for task in tasks %}
-            <div class="task-card {% if task.is_completed %}completed{% endif %}">
-                <div class="task-header">
-                    <h3>{{ task.title }}</h3>
-                    <p class="status {% if task.is_completed %}completed{% else %}pending{% endif %}">
-                        {{ 'Completed' if task.is_completed else 'Pending' }}
-                    </p>
-                </div>
-                <div class="task-body">
-                    <p>{{ task.description }}</p>
-                    <p class="due-date">Due: {{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                    {% if task.file_url %}
-                    <p><a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attached File</a></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tasks-section, .task-history-section {
+            margin-bottom: 30px;
+        }
+
+        .tasks-heading {
+            color: #444;
+            font-size: 28px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .task-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .task-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fff;
+            width: calc(33.333% - 20px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+                
+        }
+
+        .task-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .task-card.completed {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .status.pending {
+            background-color: #ff9800;
+        }
+
+        .status.completed {
+            background-color: #4CAF50;
+        }
+
+        .task-body {
+            margin-bottom: 15px;
+        }
+
+        .due-date {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .attachment-link {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn.submit-btn {
+            background-color: #4CAF50;
+        }
+
+        .btn.submit-btn:hover {
+            background-color: #388E3C;
+        }
+
+        .btn.logout-btn {
+            background-color: #f44336;
+        }
+
+        .btn.logout-btn:hover {
+            background-color: #c62828;
+        }
+
+        .btn.back-btn {
+            background-color: #007bff;
+        }
+
+        .btn.back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-table th, .task-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .task-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .completed {
+            background-color: #e8f5e9;
+        }
+
+        .dashboard-footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-top: 1px solid #ddd;
+        }
+
+        .no-tasks {
+            color: #888;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .task-card {
+                width: 100%;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tasks Section -->
+        <section class="tasks-section">
+            <h2 class="tasks-heading">Your Tasks</h2>
+            {% if tasks %}
+            <div class="task-cards">
+                {% for task in tasks %}
+                <div class="task-card {% if task.is_completed %}completed{% endif %}">
+                    <div class="task-header">
+                        <h3>{{ task.title }}</h3>
+                        <p class="status {% if task.is_completed %}completed{% else %}pending{% endif %}">
+                            {{ 'Completed' if task.is_completed else 'Pending' }}
+                        </p>
+                    </div>
+                    <div class="task-body">
+                        <p>{{ task.description }}</p>
+                        <p class="due-date">Due: {{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        {% if task.file_url %}
+                        <p><a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attached File</a></p>
+                        {% endif %}
+                    </div>
+                    {% if not task.is_completed %}
+                    <div class="task-footer">
+                        <a href="/submit_task/{{ task.id }}" class="btn submit-btn">Submit Task</a>
+                    </div>
                     {% endif %}
                 </div>
-                {% if not task.is_completed %}
-                <div class="task-footer">
-                    <a href="/submit_task/{{ task.id }}" class="btn submit-btn">Submit Task</a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-tasks">You have no tasks assigned yet.</p>
+            {% endif %}
+        </section>
+
+        <!-- Two-Column Task History Section -->
+        <section class="task-history-section">
+            <h2 class="tasks-heading">Task History</h2>
+            <div class="row">
+                <!-- Admin Assigned Tasks -->
+                <div class="column">
+                    <h3>Tasks Assigned by Admin</h3>
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Due Date</th>
+                                <th>File Attachment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr class="{% if task.is_completed %}completed{% endif %}">
+                                <td>{{ task.title }}</td>
+                                <td>{{ task.description }}</td>
+                                <td>{{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>
+                                    {% if task.file_url %}
+                                    <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="no-tasks">You have no tasks assigned yet.</p>
-        {% endif %}
-    </section>
 
-    <!-- Two-Column Task History Section -->
-    <section class="task-history-section">
-        <h2 class="tasks-heading">Task History</h2>
-        <div class="row">
-            <!-- Admin Assigned Tasks -->
-            <div class="column">
-                <h3>Tasks Assigned by Admin</h3>
-                <table class="task-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Due Date</th>
-                            <th>File Attachment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in tasks %}
-                        <tr class="{% if task.is_completed %}completed{% endif %}">
-                            <td>{{ task.title }}</td>
-                            <td>{{ task.description }}</td>
-                            <td>{{ task.due_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                            <td>
-                                {% if task.file_url %}
-                                <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <!-- Employee Submitted Tasks -->
+                <div class="column">
+                    <h3>Tasks Submitted by You</h3>
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Submitted On</th>
+                                <th>File Attachment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks if task.is_completed %}
+                            <tr class="completed">
+                                <td>{{ task.title }}</td>
+                                <td>{{ 'Completed' if task.is_completed else 'Pending' }}</td>
+                                <td>{{ task.submitted_on.strftime('%Y-%m-%d %H:%M:%S') if task.submitted_on else 'N/A' }}</td>
+                                <td>
+                                    {% if task.file_url %}
+                                    <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+        </section>
 
-            <!-- Employee Submitted Tasks -->
-            <div class="column">
-                <h3>Tasks Submitted by You</h3>
-                <table class="task-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Submitted On</th>
-                            <th>File Attachment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in tasks if task.is_completed %}
-                        <tr class="completed">
-                            <td>{{ task.title }}</td>
-                            <td>{{ 'Completed' if task.is_completed else 'Pending' }}</td>
-                            <td>{{ task.submitted_on.strftime('%Y-%m-%d %H:%M:%S') if task.submitted_on else 'N/A' }}</td>
-                            <td>
-                                {% if task.file_url %}
-                                <a href="{{ task.file_url }}" target="_blank" class="attachment-link">View Attachment</a>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="dashboard-footer">
-        <a href="/logout" class="btn logout-btn">Logout</a>
-    </footer>
-</div>
-{% endblock %}
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <a href="/logout" class="btn logout-btn">Logout</a>
+        </footer>
+    </div>
+    <div class="btn-container">
+        <a href="/admin_dashboard" class="btn back-btn">Back To Dashboard</a>
+    </div>
+</body>
+</html>

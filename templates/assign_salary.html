@@ -1,23 +1,125 @@
-{% extends "base.html" %}
-{% block title %}Assign Salary{% endblock %}
-{% block content %}
-<div class="container">
-    <header class="dashboard-header">
-        <h1 class="dashboard-title">Assign Salary</h1>
-    </header>
-    
-    <section class="salary-assignment-section">
-        <h2 class="section-heading">Assign Salary to {{ task.employee.full_name }}</h2>
-        <form action="/assign_salary/{{ task.id }}" method="POST" class="form">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Salary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #cfc4c4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #e0dede;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group input[type="text"] {
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #2196F3;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #1976D2;
+        }
+
+        .btn:disabled {
+            background-color: #bbb;
+            cursor: not-allowed;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assign Salary</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="employee_id">Employee:</label>
+                <select id="employee_id" name="employee_id" required>
+                    {% for employee in employees %}
+                        <option value="{{ employee.id }}">{{ employee.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group">
                 <label for="salary">Salary:</label>
                 <input type="text" id="salary" name="salary" required>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Assign Salary" class="btn submit-btn">
-            </div>
+            <button type="submit" class="btn">Assign Salary</button>
         </form>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn back-btn">Back to Dashboard</a>
-    </section>
-</div>
-{% endblock %}
+    </div>
+    <div class="btn-container">
+        <a href="/admin_dashboard" class="btn">Back To Dashboard</a>
+    </div>
+</body>
+</html>

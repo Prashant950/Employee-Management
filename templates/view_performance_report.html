@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Performance Report</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+             .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Performance Report</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Tasks Completed</th>
+                    <th>Tasks Pending</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.full_name }}</td>
+                    <td>{{ employee.tasks|selectattr('is_completed', 'equalto', True)|list|length }}</td>
+                    <td>{{ employee.tasks|selectattr('is_completed', 'equalto', False)|list|length }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="btn-container">
+        <a href="/admin_dashboard" class="btn">Back To Dashboard</a>
+    </div>
+</body>
+</html>
